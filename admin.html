@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Content admin — Sri Narayana International School</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body class="admin-body">
+    <a href="#admin-login-form" class="skip-link">Skip to login</a>
+
+    <div id="admin-login-wrap" class="admin-login">
+      <div class="admin-login__card">
+        <h1>Admin dashboard</h1>
+        <p class="admin-login__meta">
+          Sri Narayana International School — manage announcements, events, and gallery. Session unlocks until you close
+          the browser tab.
+        </p>
+        <p id="admin-login-error" class="admin-login__error" role="alert"></p>
+        <form id="admin-login-form">
+          <div class="form-group">
+            <label for="admin-pin">PIN</label>
+            <input id="admin-pin" name="pin" type="password" autocomplete="current-password" required />
+          </div>
+          <button type="submit" class="btn btn--primary" style="width: 100%; margin-top: 0.5rem">Unlock</button>
+        </form>
+        <p class="admin-hint">Default PIN is set in <code>js/data-store.js</code> (<code>DEFAULT_PIN</code>).</p>
+        <p class="admin-hint"><a href="index.html">← Back to website</a></p>
+      </div>
+    </div>
+
+    <div id="admin-shell" class="admin-shell" hidden>
+      <div class="admin-top">
+        <h1>Content management</h1>
+        <div class="admin-toolbar">
+          <button type="button" id="admin-export" class="btn btn--outline btn--sm">Export JSON</button>
+          <label class="btn btn--outline btn--sm" style="cursor: pointer; margin: 0">
+            Import JSON
+            <input id="admin-import" type="file" accept="application/json,.json" hidden />
+          </label>
+          <button type="button" id="admin-reset-seed" class="btn btn--sm btn--outline">Reset to samples</button>
+          <button type="button" id="admin-logout" class="btn btn--sm btn--ghost">Lock</button>
+        </div>
+      </div>
+
+      <div class="admin-tabs" role="tablist">
+        <button type="button" class="is-active" data-tab="announcements" role="tab" aria-selected="true">Announcements</button>
+        <button type="button" data-tab="events" role="tab" aria-selected="false">Events</button>
+        <button type="button" data-tab="gallery" role="tab" aria-selected="false">Gallery</button>
+      </div>
+
+      <section class="admin-panel is-active" data-panel="announcements" aria-label="Announcements">
+        <div style="margin-bottom: 1rem">
+          <button type="button" id="add-announcement" class="btn btn--primary btn--sm">Add announcement</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Title</th>
+              <th>Excerpt</th>
+              <th>Image URL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-announcements"></tbody>
+        </table>
+      </section>
+
+      <section class="admin-panel" data-panel="events" aria-label="Events">
+        <div style="margin-bottom: 1rem">
+          <button type="button" id="add-event" class="btn btn--primary btn--sm">Add event</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Venue</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-events"></tbody>
+        </table>
+      </section>
+
+      <section class="admin-panel" data-panel="gallery" aria-label="Gallery">
+        <div style="margin-bottom: 1rem">
+          <button type="button" id="add-gallery" class="btn btn--primary btn--sm">Add gallery item</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Caption</th>
+              <th>Image URL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-gallery"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <div id="admin-modal" class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+      <div class="admin-modal__dialog">
+        <div class="admin-modal__head">
+          <h2 id="admin-modal-title">Edit</h2>
+          <button type="button" id="admin-modal-close" class="admin-modal__close" aria-label="Close">×</button>
+        </div>
+        <form id="admin-modal-form">
+          <fieldset class="modal-fields" data-for="announcement" hidden>
+            <div class="form-group">
+              <label for="f-a-title">Title</label>
+              <input id="f-a-title" data-field="title" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="f-a-date">Date</label>
+              <input id="f-a-date" data-field="dateISO" type="date" required />
+            </div>
+            <div class="form-group">
+              <label for="f-a-body">Body</label>
+              <textarea id="f-a-body" data-field="body" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="f-a-img">Image URL (optional)</label>
+              <input id="f-a-img" data-field="imageUrl" type="url" placeholder="https://..." />
+            </div>
+          </fieldset>
+          <fieldset class="modal-fields" data-for="event" hidden>
+            <div class="form-group">
+              <label for="f-e-title">Title</label>
+              <input id="f-e-title" data-field="title" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="f-e-date">Start date</label>
+              <input id="f-e-date" data-field="dateISO" type="date" required />
+            </div>
+            <div class="form-group">
+              <label for="f-e-end">End date (optional)</label>
+              <input id="f-e-end" data-field="endDateISO" type="date" />
+            </div>
+            <div class="form-group">
+              <label for="f-e-desc">Description</label>
+              <textarea id="f-e-desc" data-field="description" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="f-e-venue">Venue</label>
+              <input id="f-e-venue" data-field="venue" type="text" />
+            </div>
+          </fieldset>
+          <fieldset class="modal-fields" data-for="gallery" hidden>
+            <div class="form-group">
+              <label for="f-g-title">Title</label>
+              <input id="f-g-title" data-field="title" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="f-g-cap">Caption</label>
+              <textarea id="f-g-cap" data-field="caption" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="f-g-img">Image URL</label>
+              <input id="f-g-img" data-field="imageUrl" type="url" required placeholder="https://..." />
+            </div>
+          </fieldset>
+          <div class="admin-form-actions">
+            <button type="submit" class="btn btn--primary">Save</button>
+            <button type="button" id="admin-modal-cancel" class="btn btn--outline">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/data-store.js"></script>
+    <script src="js/ui-admin.js"></script>
+  </body>
+</html>
